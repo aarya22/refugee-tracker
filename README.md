@@ -7,4 +7,5 @@ Data from the United Nations available [here](https://www.kaggle.com/unitednatio
 Package dependencies (install before running): 
 
 install.packages('leaflet')
+
 install.packages('geojsonio')
