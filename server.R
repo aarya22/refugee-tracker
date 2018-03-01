@@ -20,7 +20,7 @@ server <- function(input, output) {
                       long = c(mydf$InitialLong, mydf$NewLong))
   
   # Create the map
-  output$map <- renderLeaflet({
+  output$rmap <- renderLeaflet({
     leaflet(world) %>%
       addTiles(
         urlTemplate = "https://api.mapbox.com/styles/v1/aarya22/cje65iy6k03db2rs272v1h8ld/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiYWFyeWEyMiIsImEiOiJjamU2NWNvNWUwMDVrMzNvY3Q0NGluZ3o0In0.v3dVCyNNhVq-vFtL237dGw",
@@ -40,6 +40,29 @@ server <- function(input, output) {
            dashArray = "",
            fillOpacity = 0.7,
            bringToFront = TRUE)
+      )
+  })
+  
+  output$amap <- renderLeaflet({
+    leaflet(world) %>%
+      addTiles(
+        urlTemplate = "https://api.mapbox.com/styles/v1/aarya22/cje65iy6k03db2rs272v1h8ld/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiYWFyeWEyMiIsImEiOiJjamU2NWNvNWUwMDVrMzNvY3Q0NGluZ3o0In0.v3dVCyNNhVq-vFtL237dGw",
+        attribution = 'Maps by <a href="http://www.mapbox.com/">Mapbox</a>'
+      ) %>%
+      setView(lng = -73.33251, lat = -7.324879e+00, zoom = 3) %>%
+      addPolylines(data = mydf2, lng = ~long, lat = ~lat, group = ~group) %>%
+      addPolygons(
+        weight = 1,
+        opacity = 0.7,
+        dashArray = "3",
+        color = "#d6d6d6",
+        fillOpacity = 0.3,
+        highlight = highlightOptions(
+          weight = 5,
+          color = "#666",
+          dashArray = "",
+          fillOpacity = 0.7,
+          bringToFront = TRUE)
       )
   })
   
