@@ -15,10 +15,26 @@ server <- function(input, output) {
   world.cities$country.etc <- countrycode(world.cities$country.etc,origin = "country.name", 
                                           destination = "iso3c")
   
-  refugee <- read.csv("data/resettlement.csv", stringsAsFactors = FALSE)
-  refugee$Country...territory.of.asylum.residence <- countrycode(refugee$Country...territory.of.asylum.residence,
-                origin = "country.name", destination = "iso3c")
-  refugee$Origin <- countrycode(refugee$Origin,origin = "country.name", destination = "iso3c")
+  # refugee <- read.csv("data/resettlement.csv", stringsAsFactors = FALSE)
+  # refugee$Country...territory.of.asylum.residence <- countrycode(refugee$Country...territory.of.asylum.residence,
+  #               origin = "country.name", destination = "iso3c")
+  # refugee$Origin <- countrycode(refugee$Origin,origin = "country.name", destination = "iso3c")
+  # 
+  # asylum <- read.csv("data/asylum_seekers.csv", stringsAsFactors = FALSE)
+  # asylum$Country...territory.of.asylum.residence <- countrycode(asylum$Country...territory.of.asylum.residence,
+  #                                                               origin = "country.name", destination = "iso3c")
+  # asylum$Origin <- countrycode(asylum$Origin,origin = "country.name", destination = "iso3c")
+  # asylum[, 4:14] <- sapply(asylum[, 4:14], as.numeric)
+  
+  refugee <- read.csv("data/resettlement_map.csv", stringsAsFactors = FALSE)
+  asylum <- read.csv("data/asylum_seekers_map.csv", stringsAsFactors = FALSE)
+  
+  
+  asylum <- mutate(asylum, 
+                   un.assist = of.which.UNHCR.assisted.start.year. + of.which.UNHCR.assisted.end.year.,
+                   pending = Tota.pending.start.year + Total.pending.end.year,
+                   recognized = decisions_recognized + decisions_other,
+                   rejected = Rejected + Otherwise.closed)
   
   world <- geojsonio::geojson_read("json/countries.geo.json", what = "sp")
   
@@ -98,6 +114,8 @@ server <- function(input, output) {
   }
   
   showRefugeeLines <- function(country, year, direction) {
+    browser()
+    
     query.in <- as.data.frame(filter(refugee, 
                                      refugee$Country...territory.of.asylum.residence == country, 
                                      refugee$Year==year))
@@ -105,49 +123,71 @@ server <- function(input, output) {
                                       refugee$Origin == country, 
                                       refugee$Year==year))
     
-    if (length(query.in$Origin) == 0 && direction == "Incoming") {
+    if (length(query.in$Origin) == 0 && direction != "Outgoing") {
       # Have to output no data available
-      return()
-    }
-    
-    if (length(query.out$Origin) == 0 && direction == "Outgoing") {
-      # Have to output no data available
-      return ()
-    }
-    
-    if ((length(query.out$Origin) == 0 || length(query.in$Origin) == 0) && direction == "Both") {
-      # Have to output no data available
-      return ()
-    }
-    
-    if (direction == "Incoming") {
+      print("No Incoming Data Available")
+    } else if(direction != "Outgoing") {
       coord.df.in <- getLatLong(query.in, direction)
       lines.in <- points_to_line(coord.df.in, "long", "lat", "group")
       
-      leafletProxy("rmap") %>% addPolylines(data=lines.in, group = "in-lines", color = "red")
-    } else if (direction == "Outgoing") {
-      coord.df.out <- getLatLong(query.out, direction)
-      browser()
-      lines.out <- points_to_line(coord.df.out, "long", "lat", "group")
+      dec <- select(query.in, Value)
+      dec <- as.numeric(unlist(dec))
       
-      leafletProxy("rmap") %>% addPolylines(data=lines.out, group = "out-lines", color = "blue")
-    } else {
-      coord.df.in <- getLatLong(query.in, "Incoming")
-      lines.in <- points_to_line(coord.df.in, "long", "lat", "group")
-      coord.df.out <- getLatLong(query.out, "Outgoing")
-      lines.out <- points_to_line(coord.df.out, "long", "lat", "group")
+      cnames <- countrycode(query.in$Origin, "iso3c", "country.name")
       
-      leafletProxy("rmap") %>% addPolylines(data=lines.in, group = "in-lines", color = "red")
-      leafletProxy("rmap") %>% addPolylines(data=lines.out, group = "out-lines", color = "blue")
+      labels = sprintf("<strong>%s</strong><br/>%g refugees incoming", cnames, dec) %>% lapply(htmltools::HTML)
+      
+      leafletProxy("rmap") %>% clearGroup("in-lines") %>% clearGroup("out-lines") 
+      leafletProxy("rmap") %>% addPolylines(data=lines.in, group = "in-lines", color = "red",
+                                            highlight = highlightOptions(
+                                              weight = 10,
+                                              color = "#666",
+                                              dashArray = "",
+                                              fillOpacity = 0.5,
+                                              bringToFront = TRUE),
+                                            label = labels,
+                                            labelOptions = labelOptions(
+                                              style = list("font-weight" = "normal", padding = "3px 8px"),
+                                              textsize = "15px",
+                                              direction = "auto")
+                                           )
     }
     
+    if (length(query.out$Origin) == 0 && direction != "Incoming") {
+      # Have to output no data available
+      print("No Outgoing Data Available")
+    } else if(direction != "Incoming") {
+      coord.df.out <- getLatLong(query.out, direction)
+      lines.out <- points_to_line(coord.df.out, "long", "lat", "group")
+      
+      dec <- select(query.out, Value)
+      dec <- as.numeric(unlist(dec))
+      
+      cnames <- countrycode(query.out$Origin, "iso3c", "country.name")
+      
+      labels = sprintf("<strong>%s</strong><br/>%g refugees outgoing", cnames, dec) %>% lapply(htmltools::HTML)
+      
+      leafletProxy("rmap") %>% clearGroup("out-lines") %>% clearGroup("in-lines")
+      leafletProxy("rmap") %>% addPolylines(data=lines.out, group = "out-lines", color = "blue",
+                                            highlight = highlightOptions(
+                                              weight = 10,
+                                              color = "#666",
+                                              dashArray = "",
+                                              fillOpacity = 0.5,
+                                              bringToFront = TRUE),
+                                            label = labels,
+                                            labelOptions = labelOptions(
+                                              style = list("font-weight" = "normal", padding = "3px 8px"),
+                                              textsize = "15px",
+                                              direction = "auto")
+                                           ) 
+    }
   }
   
   observe({
     event <- input$rmap_shape_click
     if (is.null(event))
       return()
-    leafletProxy("rmap") %>% clearGroup("in-lines") %>% clearGroup("out-lines")
     country <- map.where(x = event$lng, y = event$lat)
     country <- countrycode(country, origin = "country.name", destination = "iso3c")
     isolate({
@@ -162,7 +202,6 @@ server <- function(input, output) {
         attribution = 'Maps by <a href="http://www.mapbox.com/">Mapbox</a>'
       ) %>%
       setView(lng = -73.33251, lat = -7.324879e+00, zoom = 3) %>%
-      addPolylines(data = mydf2, lng = ~long, lat = ~lat, group = ~group) %>%
       addPolygons(
         weight = 1,
         opacity = 0.7,
@@ -173,9 +212,71 @@ server <- function(input, output) {
           weight = 5,
           color = "#666",
           dashArray = "",
-          fillOpacity = 0.7,
-          bringToFront = TRUE)
+          fillOpacity = 0.7)
       )
   })
+  
+  observe({
+    event <- input$amap_shape_click
+    if (is.null(event))
+      return()
+    country <- map.where(x = event$lng, y = event$lat)
+    country <- countrycode(country, origin = "country.name", destination = "iso3c")
+    isolate({
+      showAsylumLines(country, input$asYears, input$Decisions)
+    })
+  })
+  
+  showAsylumLines <- function(country, year, decision) {
+
+    if (decision == "All") {
+      decision = "Total.decisions"
+    } else if (decision == "Recognized") {
+      decision = "recognized"
+    } else if (decision == "Rejected") {
+      decision = "rejected"
+    } else if (decision == "UN-Assisted") {
+      decision = "un.assist"
+    } else if (decision == "Pending") {
+      decision = "pending"
+    }
+    
+    query <- as.data.frame(filter(asylum, 
+                                  asylum$Country...territory.of.asylum.residence == country, 
+                                  asylum$Year==year) %>% select(Year, Country...territory.of.asylum.residence, Origin, decision))
+    query <- query[complete.cases(query), ]
+    
+    if (length(query$Origin) == 0) {
+      return("No Data Available")
+    }
+    
+    query <- aggregate(. ~ Country...territory.of.asylum.residence + Origin + Year, data = query, sum)
+    query <- filter(query, decision > 0)
+    
+    coord.df <- getLatLong(query, "Incoming")
+    lines <- points_to_line(coord.df, "long", "lat", "group")
+    
+    dec <- select(query, decision)
+    dec <- as.numeric(unlist(dec))
+    
+    cnames <- countrycode(query$Origin, "iso3c", "country.name")
+    
+    labels = sprintf("<strong>%s</strong><br/>%g applications", cnames, dec) %>% lapply(htmltools::HTML)
+    
+    leafletProxy("amap") %>% clearGroup("as-lines") 
+    leafletProxy("amap") %>% addPolylines(data=lines, group = "as-lines", color = "green",
+                                          highlight = highlightOptions(
+                                            weight = 10,
+                                            color = "#666",
+                                            dashArray = "",
+                                            fillOpacity = 0.5,
+                                            bringToFront = TRUE),
+                                          label = labels,
+                                          labelOptions = labelOptions(
+                                            style = list("font-weight" = "normal", padding = "3px 8px"),
+                                            textsize = "15px",
+                                            direction = "auto")
+                                          )
+  }
   
 }

@@ -24,7 +24,7 @@ navbarPage("Refugee-Tracker", id="nav",
                     
                     selectInput("Years", "Year", c(1959:2015)),
                     
-                    selectInput("Direction", "Refugee Direction", c("Incoming", "Outgoing", "Both"))
+                    selectInput("Direction", "Refugee Direction", c("Incoming", "Outgoing"))
                     # sliderInput(
                     #   inputId = 'years',
                     #   label = h3('Year'),
@@ -60,7 +60,7 @@ navbarPage("Refugee-Tracker", id="nav",
                      selectInput("Decisions", "Decisions",
                                  c("All", "Recognized", "Rejected", "UN-Assisted", "Pending")),
                      
-                     selectInput("Years", "Year", c(2000:2016))
+                     selectInput("asYears", "Year", c(2000:2016))
                      
                      # Should I do monthly? Will be confusing because cannot select decision input.
                      # selectInput("Months", "Month", months)
