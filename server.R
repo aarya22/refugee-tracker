@@ -4,7 +4,7 @@ library("dplyr")
 library("geojsonio")
 
 server <- function(input, output) {
-  
+    
   world <- geojsonio::geojson_read("json/countries.geo.json", what = "sp")
   
   # Examples to demonstrate lines
@@ -43,4 +43,31 @@ server <- function(input, output) {
       )
   })
   
+  time.series <- read.csv('data/time_series.csv', stringsAsFactors = FALSE, fileEncoding
+                          = "UTF-8-BOM")
+  
+  # How to organize the dataframe
+  # 1. Combine all of the values for the same countries regardless of the type of refugeee for EACH YEAR
+  # 2. Sort by descending order (Highest to lowest)
+  new.order <- arrange(time.series, Value)
+    
+  # Create a table
+  output$table <- renderTable({
+    # If user clicks kilotons in the widget
+    if (input$Direction == 'In') {
+      input.year <- paste0(input$year)
+      # Filter the columns of interest
+      in.year <- filter(time.series, Year == input.year)
+      in.data <- arrange(in.year, -Value)
+      return(in.data)
+      
+      # User clicks "outgoing" in the widget
+    } else {
+      input.year <- paste0(input$year)
+      # Filter the columns of interest
+      out.year <- filter(time.series, Year == input.year)
+      out.data <- arrange(out.year, -Value)
+      return(out.data)
+    }
+  })
 }
