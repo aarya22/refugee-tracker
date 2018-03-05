@@ -55,17 +55,15 @@ server <- function(input, output) {
   output$table <- renderTable({
     # If user clicks kilotons in the widget
     if (input$Direction == 'In') {
-      input.year <- paste0(input$year)
       # Filter the columns of interest
-      in.year <- filter(time.series, Year == input.year)
+      in.year <- filter(time.series, Year == input$year)
       in.data <- arrange(in.year, -Value)
       return(in.data)
       
       # User clicks "outgoing" in the widget
     } else {
-      input.year <- paste0(input$year)
       # Filter the columns of interest
-      out.year <- filter(time.series, Year == input.year)
+      out.year <- filter(time.series, Year == input$year)
       out.data <- arrange(out.year, -Value)
       return(out.data)
     }
