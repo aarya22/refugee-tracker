@@ -43,4 +43,15 @@ server <- function(input, output) {
       )
   })
   
+  output$unHelped <- renderText({
+    refugee.data <- read.csv('data/asylum_seekers.csv', stringsAsFactors = FALSE) 
+    yearFiltered <- filter(refugee.data, Year == input$yearInput)
+    un.assist <- sapply(yearFiltered$of.which.UNHCR.assisted.end.year., as.numeric)
+    total.applied <- sapply(yearFiltered$Applied.during.year, as.numeric)
+    percent.un.assist <- (sum(un.assist, na.rm = T) /
+                                  sum(total.applied, na.rm = T)) * 100
+    
+    
+  })
+  
 }
