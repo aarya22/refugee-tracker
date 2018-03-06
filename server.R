@@ -68,8 +68,7 @@ server <- function(input, output) {
            weight = 5,
            color = "#666",
            dashArray = "",
-           fillOpacity = 0.7,
-           bringToFront = TRUE)
+           fillOpacity = 0.7)
       )
   })
   
@@ -114,7 +113,7 @@ server <- function(input, output) {
   }
   
   showRefugeeLines <- function(country, year, direction) {
-    browser()
+    #browser()
     
     query.in <- as.data.frame(filter(refugee, 
                                      refugee$Country...territory.of.asylum.residence == country, 
@@ -228,9 +227,9 @@ server <- function(input, output) {
   })
   
   showAsylumLines <- function(country, year, decision) {
-
+    
     if (decision == "All") {
-      decision = "Total.decisions"
+      decision = "Total.decisions" #Make all into sum of recognized, rejected, un.assist and pending
     } else if (decision == "Recognized") {
       decision = "recognized"
     } else if (decision == "Rejected") {
@@ -246,13 +245,17 @@ server <- function(input, output) {
                                   asylum$Year==year) %>% select(Year, Country...territory.of.asylum.residence, Origin, decision))
     query <- query[complete.cases(query), ]
     
-    if (length(query$Origin) == 0) {
-      return("No Data Available")
-    }
+    names(query)[4] <- "decision"
     
     query <- aggregate(. ~ Country...territory.of.asylum.residence + Origin + Year, data = query, sum)
     query <- filter(query, decision > 0)
     
+    if (length(query$Origin) == 0) {
+      print("No Data Available")
+      return()
+    }
+    
+    #browser()
     coord.df <- getLatLong(query, "Incoming")
     lines <- points_to_line(coord.df, "long", "lat", "group")
     

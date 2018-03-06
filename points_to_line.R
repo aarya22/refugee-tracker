@@ -24,7 +24,6 @@ points_to_line <- function(data, long, lat, id_field = NULL, sort_field = NULL) 
     
     # Now, if we have multiple lines...
   } else if (!is.null(id_field)) {  
-    
     # Split into a list by ID field
     paths <- sp::split(data, data[[id_field]])
     
