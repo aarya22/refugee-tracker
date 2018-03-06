@@ -52,19 +52,19 @@ server <- function(input, output) {
   new.order <- arrange(time.series, Value)
     
   # Create a table
-  output$table <- renderTable({
+  output$ranking <- renderTable({
     # If user clicks kilotons in the widget
     if (input$Direction == 'In') {
       # Filter the columns of interest
       in.year <- filter(time.series, Year == input$year)
-      in.data <- arrange(in.year, -Value)
+      in.data <- arrange(in.year, desc(Value))
       return(in.data)
       
       # User clicks "outgoing" in the widget
     } else {
       # Filter the columns of interest
       out.year <- filter(time.series, Year == input$year)
-      out.data <- arrange(out.year, -Value)
+      out.data <- arrange(out.year, desc(Value))
       return(out.data)
     }
   })
