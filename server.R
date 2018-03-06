@@ -57,14 +57,16 @@ server <- function(input, output) {
     if (input$Direction == 'In') {
       # Filter the columns of interest
       in.year <- filter(time.series, Year == input$year)
-      in.data <- arrange(in.year, desc(Value))
+      in.data <- arrange(in.year, desc(Value))%>%
+        select(Year, Country...territory.of.asylum.residence, Origin, Value)
       return(in.data)
       
       # User clicks "outgoing" in the widget
     } else {
       # Filter the columns of interest
       out.year <- filter(time.series, Year == input$year)
-      out.data <- arrange(out.year, desc(Value))
+      out.data <- arrange(out.year, desc(Value))%>%
+        select(Year, Country...territory.of.asylum.residence, Origin, Value)
       return(out.data)
     }
   })
