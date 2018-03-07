@@ -25,17 +25,6 @@ navbarPage("Refugee-Tracker", id="nav",
                     selectInput("Years", "Year", c(1959:2015)),
                     
                     selectInput("Direction", "Refugee Direction", c("Incoming", "Outgoing"))
-                    # sliderInput(
-                    #   inputId = 'years',
-                    #   label = h3('Year'),
-                    #   min = 1959,
-                    #   max = 2015,
-                    #   sep="",
-                    #   value = 2000
-                    # )
-                    
-                    ## Time Series Functionality - Graph of Time Series for selected country
-                    ## Maybe this should be its own tab
       )
     )
   ),
@@ -66,5 +55,35 @@ navbarPage("Refugee-Tracker", id="nav",
                      # selectInput("Months", "Month", months)
        )
      )
-   )
+   ),
+  
+   tabPanel("Country Summary",
+           div(class="summary",
+               
+               tags$head(
+                 # Include our custom CSS
+                 includeCSS("styles.css")
+               ),
+               
+               htmlOutput("reftitle"),
+               
+               absolutePanel(id = "controls-summary", class = "panel panel-default", fixed = TRUE,
+                             draggable = FALSE, top = 60, left = "auto", right = 20, bottom = "auto",
+                             width = 330, height = "auto",
+                             
+                             h2("Country Summary"),
+                             
+                             selectInput("Country", "Country",
+                                         c("Afghanistan", "Sierra Leone")),
+                             
+                             selectInput("sumYears", "Year", c(2001:2016))
+               )
+           ),
+           
+           div(class="bar",
+               plotOutput("refbar", height = 500, width = 500)
+           )
+           
+       )
+  
 )

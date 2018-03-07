@@ -9,11 +9,11 @@ server <- function(input, output) {
   
   source("points_to_line.R")
   
-  data("world.cities")
-  world.cities$country.etc <- replace(world.cities$country.etc, 
-                                      world.cities$country.etc == "Serbia and Montenegro", "Serbia")
-  world.cities$country.etc <- countrycode(world.cities$country.etc,origin = "country.name", 
-                                          destination = "iso3c")
+  # data("world.cities")
+  # world.cities$country.etc <- replace(world.cities$country.etc, 
+  #                                     world.cities$country.etc == "Serbia and Montenegro", "Serbia")
+  # world.cities$country.etc <- countrycode(world.cities$country.etc,origin = "country.name", 
+  #                                         destination = "iso3c")
   
   # refugee <- read.csv("data/resettlement.csv", stringsAsFactors = FALSE)
   # refugee$Country...territory.of.asylum.residence <- countrycode(refugee$Country...territory.of.asylum.residence,
@@ -28,13 +28,9 @@ server <- function(input, output) {
   
   refugee <- read.csv("data/resettlement_map.csv", stringsAsFactors = FALSE)
   asylum <- read.csv("data/asylum_seekers_map.csv", stringsAsFactors = FALSE)
+  demo1 <- read.csv("data/demographics_agg.csv", stringsAsFactors = FALSE)
+  world.cities <- read.csv("data/world.cities.csv", stringsAsFactors = FALSE)
   
-  
-  asylum <- mutate(asylum, 
-                   un.assist = of.which.UNHCR.assisted.start.year. + of.which.UNHCR.assisted.end.year.,
-                   pending = Tota.pending.start.year + Total.pending.end.year,
-                   recognized = decisions_recognized + decisions_other,
-                   rejected = Rejected + Otherwise.closed)
   world <- geojsonio::geojson_read("json/countries.geo.json", what = "sp")
   
   # # Examples to demonstrate lines
@@ -326,5 +322,25 @@ server <- function(input, output) {
                                             direction = "auto")
                                           )
   }
+  
+  output$refbar <- renderPlot({
+    r <- filter(demo1, demo1$Country == input$Country, demo1$Year == input$sumYears)
+    if (nrow(r) != 1) {
+      showNotification("No Refugee Demographics Available", type = "error")
+      return()
+    }
+    slices <- as.numeric(r[,4:9])
+    lbls <- c("Female (0-17)", "Female (18+)", "Female (Unknown)", "Male (0-17)", "Male (18+)", "Male (Unknown)")
+    title <- paste("Refugee Demographics of", input$Country,"in", input$sumYears)
+    color <- c("red", "red", "red", "blue", "blue", "blue")
+    bar <- barplot(slices,xlab = "Category",ylab = "Refugees",col = color,
+                   main = title)
+    text(x=bar[,1], y=-1, adj=c(1, 1), lbls, cex=0.8, srt=45, xpd=TRUE)
+  })
+  
+  output$reftitle <- renderUI({
+    title <- paste("    ",input$Country, "in", input$sumYears)
+    HTML(paste("<h1>",title,"</h1>", sep=""))
+  })
   
 }
