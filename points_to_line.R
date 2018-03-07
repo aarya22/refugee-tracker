@@ -27,12 +27,12 @@ points_to_line <- function(data, long, lat, id_field = NULL, sort_field = NULL) 
     # Split into a list by ID field
     paths <- sp::split(data, data[[id_field]])
     
-    sp_lines <- SpatialLines(list(Lines(list(Line(paths[[1]])), "line1")))
+    sp_lines <- SpatialLines(list(Lines(list(Line(paths[[1]])), names(paths)[1])))
     
     # I like for loops, what can I say...
     if (length(paths) > 1) {
       for (p in 2:length(paths)) {
-        id <- paste0("line", as.character(p))
+        id <- names(paths)[p]
         l <- SpatialLines(list(Lines(list(Line(paths[[p]])), id)))
         sp_lines <- spRbind(sp_lines, l)
       }

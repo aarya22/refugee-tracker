@@ -79,29 +79,29 @@ server <- function(input, output) {
   }
   
   # Takes a query from the refugee file and transforms it into a dataframe
-  getLatLong <- function(query, direction) {
+  getLatLong <- function(origin.countries, origin.coords, host.coords) {
     
-    if (direction == "Incoming") {
-      origin.countries <- query$Origin
-      country <- query$Country...territory.of.asylum.residence[1]
-    } else if (direction == "Outgoing") {
-      origin.countries <- query$Country...territory.of.asylum.residence
-      country <- query$Origin
-    }
-    
-    # Get host country coordinates
-    host.coords <- get_coords(country)
-    
-    # Get origin countries lat/long
-    origin.coords <- lapply(origin.countries, get_coords)
-    
-    # Remove empty coordinates and respective countries
-    empty.vals <- sapply(origin.coords, function(x) dim(x)[1]) > 0
-    origin.coords <- origin.coords[empty.vals]
-    origin.countries <- origin.countries[empty.vals]
+    # if (direction == "Incoming") {
+    #   origin.countries <- query$Origin
+    #   country <- query$Country...territory.of.asylum.residence[1]
+    # } else if (direction == "Outgoing") {
+    #   origin.countries <- query$Country...territory.of.asylum.residence
+    #   country <- query$Origin
+    # }
+    # 
+    # # Get host country coordinates
+    # host.coords <- get_coords(country)
+    # 
+    # # Get origin countries lat/long
+    # origin.coords <- lapply(origin.countries, get_coords)
+    # 
+    # # Remove empty coordinates and respective countries
+    # empty.vals <- sapply(origin.coords, function(x) dim(x)[1]) > 0
+    # origin.coords <- origin.coords[empty.vals]
+    # origin.countries <- origin.countries[empty.vals]
     
     # Make Long/Lat dataframe
-    origin.coords <- as.data.frame(origin.coords)
+    origin.coords <- as.data.frame(origin.coords)[1,]
     originLat <- unname(unlist(origin.coords[ , grepl( "lat" , names( origin.coords ) ) ]))
     originLong <- unname(unlist(origin.coords[ , grepl( "long" , names( origin.coords ) ) ]))
     hostLat <- rep(host.coords$lat, length(originLat))
@@ -113,8 +113,7 @@ server <- function(input, output) {
   }
   
   showRefugeeLines <- function(country, year, direction) {
-    #browser()
-    
+
     query.in <- as.data.frame(filter(refugee, 
                                      refugee$Country...territory.of.asylum.residence == country, 
                                      refugee$Year==year))
@@ -124,15 +123,27 @@ server <- function(input, output) {
     
     if (length(query.in$Origin) == 0 && direction != "Outgoing") {
       # Have to output no data available
-      print("No Incoming Data Available")
+      showNotification("No Incoming Data Available", type = "error")
     } else if(direction != "Outgoing") {
-      coord.df.in <- getLatLong(query.in, direction)
+      origin.countries <- query.in$Origin
+      country <- query.in$Country...territory.of.asylum.residence[1]
+      
+      # Get origin countries lat/long
+      origin.coords <- lapply(origin.countries, get_coords)
+      host.coords <- get_coords(country)
+      
+      # Remove empty coordinates and respective countries
+      empty.vals <- sapply(origin.coords, function(x) dim(x)[1]) > 0
+      origin.coords <- origin.coords[empty.vals]
+      origin.countries <- origin.countries[empty.vals]
+      
+      origin.dat <- query.in$Value[empty.vals]
+      dec <- as.numeric(unlist(origin.dat))
+      browser()
+      coord.df.in <- getLatLong(origin.countries, origin.coords, host.coords)
       lines.in <- points_to_line(coord.df.in, "long", "lat", "group")
       
-      dec <- select(query.in, Value)
-      dec <- as.numeric(unlist(dec))
-      
-      cnames <- countrycode(query.in$Origin, "iso3c", "country.name")
+      cnames <- countrycode(names(lines.in), "iso3c", "country.name")
       
       labels = sprintf("<strong>%s</strong><br/>%g refugees incoming", cnames, dec) %>% lapply(htmltools::HTML)
       
@@ -154,13 +165,25 @@ server <- function(input, output) {
     
     if (length(query.out$Origin) == 0 && direction != "Incoming") {
       # Have to output no data available
-      print("No Outgoing Data Available")
+      showNotification("No Outgoing Data Available", type="error")
     } else if(direction != "Incoming") {
-      coord.df.out <- getLatLong(query.out, direction)
-      lines.out <- points_to_line(coord.df.out, "long", "lat", "group")
+      origin.countries <- query$Country...territory.of.asylum.residence
+      country <- query$Origin
       
-      dec <- select(query.out, Value)
-      dec <- as.numeric(unlist(dec))
+      # Get origin countries lat/long
+      origin.coords <- lapply(origin.countries, get_coords)
+      host.coords <- get_coords(country)
+      
+      # Remove empty coordinates and respective countries
+      empty.vals <- sapply(origin.coords, function(x) dim(x)[1]) > 0
+      origin.coords <- origin.coords[empty.vals]
+      origin.countries <- origin.countries[empty.vals]
+      
+      origin.dat <- query.out$Value[empty.vals]
+      dec <- as.numeric(unlist(origin.dat))
+      
+      coord.df.out <- getLatLong(origin.countries, origin.coords, host.coords)
+      lines.out <- points_to_line(coord.df.out, "long", "lat", "group")
       
       cnames <- countrycode(query.out$Origin, "iso3c", "country.name")
       
@@ -245,24 +268,36 @@ server <- function(input, output) {
                                   asylum$Year==year) %>% select(Year, Country...territory.of.asylum.residence, Origin, decision))
     query <- query[complete.cases(query), ]
     
-    names(query)[4] <- "decision"
-    
     query <- aggregate(. ~ Country...territory.of.asylum.residence + Origin + Year, data = query, sum)
     query <- filter(query, decision > 0)
     
     if (length(query$Origin) == 0) {
-      print("No Data Available")
+      showNotification("No Data Available", type = "error")
       return()
     }
     
-    #browser()
-    coord.df <- getLatLong(query, "Incoming")
+    origin.countries <- query$Origin
+    country <- query$Country...territory.of.asylum.residence[1]
+    
+    # Get origin countries lat/long
+    origin.coords <- lapply(origin.countries, get_coords)
+    host.coords <- get_coords(country)
+    
+    # Remove empty coordinates and respective countries
+    empty.vals <- sapply(origin.coords, function(x) dim(x)[1]) > 0
+    origin.coords <- origin.coords[empty.vals]
+    origin.countries <- origin.countries[empty.vals]
+    
+    names(query)[4] <- "decision"
+    origin.dat <- query$decision[empty.vals]
+    dec <- as.numeric(unlist(origin.dat))
+    
+    browser()
+    coord.df <- getLatLong(origin.countries, origin.coords, host.coords)
     lines <- points_to_line(coord.df, "long", "lat", "group")
     
-    dec <- select(query, decision)
-    dec <- as.numeric(unlist(dec))
-    
-    cnames <- countrycode(query$Origin, "iso3c", "country.name")
+    #origin.countries <- query$Origin[!is.na(origin.countries)]
+    cnames <- countrycode(origin.countries, "iso3c", "country.name")
     
     labels = sprintf("<strong>%s</strong><br/>%g applications", cnames, dec) %>% lapply(htmltools::HTML)
     
