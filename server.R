@@ -2,7 +2,9 @@ library("leaflet")
 library("shiny")
 library("dplyr")
 library("geojsonio")
+library('plotly')
 
+source('index.R')
 server <- function(input, output) {
   
   world <- geojsonio::geojson_read("json/countries.geo.json", what = "sp")
@@ -43,15 +45,56 @@ server <- function(input, output) {
       )
   })
   
-  output$unHelped <- renderText({
-    refugee.data <- read.csv('data/asylum_seekers.csv', stringsAsFactors = FALSE) 
-    yearFiltered <- filter(refugee.data, Year == input$yearInput)
-    un.assist <- sapply(yearFiltered$of.which.UNHCR.assisted.end.year., as.numeric)
-    total.applied <- sapply(yearFiltered$Applied.during.year, as.numeric)
-    percent.un.assist <- (sum(un.assist, na.rm = T) /
-                                  sum(total.applied, na.rm = T)) * 100
+  filtered.in <- reactive({
+    asylum.in.grouped <- filter(asylum.in.grouped, year == input$yearInput
+                                & country == input$countryInput) 
+  })
+  
+  filtered.out <- reactive({
+    asylum.out.grouped <- filter(asylum.out.grouped, year == input$yearInput &
+                                   origin == input$countryInput) 
+  })
+
+  
+  output$in.text <- renderText({
+
+    paste0("In the beginning of ", input$yearInput,  
+          ", there were about ", filtered.in()$people.in,
+           " refugees that were from ", input$countryInput, 
+          " who were seeking asylum in a different country. Out of those refugees,",
+          "the United Nations provided assitance to about ", round(filtered.out()$un.help.percent, 2),
+          "% of the refugees.  Note: The column \" un.helped \" displays the total number",
+          " of refugees that the UN helped in that year for that country.")
     
     
   })
   
+  output$out.text <- renderText({
+    
+    paste0("In the beginning of ", input$yearInput,  
+           ", there were about ", filtered.in()$people.in,
+           " refugees that came to ", input$countryInput, 
+           " who were seeking asylum. Out of those refugees,",
+           "the United Nations provided assitance to about ", round(filtered.out()$un.help.percent, 2),
+           "% of the refugees.  Note: The column \" un.helped \" displays the total number",
+           " of refugees that the UN helped in that year for that country.")
+    
+    
+  })
+
+  output$in.country <- renderTable({
+
+    filtered.in() %>% 
+      select(people.in, un.helped)
+    
+  })
+  
+  output$out.country <- renderTable({
+    
+    filtered.out() %>% 
+      select(people.out, un.helped)
+    
+  })
+
 }
+  

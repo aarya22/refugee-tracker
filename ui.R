@@ -1,5 +1,8 @@
 library("leaflet")
 library("shiny")
+library('shinythemes')
+
+source('index.R')
 
 vars <- c(
   "Is SuperZIP?" = "superzip",
@@ -9,7 +12,7 @@ vars <- c(
   "Population" = "adultpop"
 )
 
-navbarPage("Refugee-Tracker", id="nav",
+navbarPage("Refugee-Tracker", id="nav", theme = shinytheme("yeti"),
            
   tabPanel("Interactive map",
     div(class="outer",
@@ -40,17 +43,24 @@ navbarPage("Refugee-Tracker", id="nav",
   
   tabPanel("Information",
            sidebarPanel(
-             selectInput("yearInput", "Choose Year",
-                        choices = c("2000", "2001", "2002", "2003", "2004", "2005", "2006",
-                         "2007", "2008", "2009", "2010", "2011", "2012", "2013",
-                         "2014", "2015", "2016")
-              )
              
+             sliderInput("yearInput", "Choose Year",
+                         min = 2001, max = 2016,
+                         value = 2001, sep = ""),
+             
+             selectInput("countryInput", "Select Country",
+                         choices = unique(as.character(asylum.in.grouped$country))
+             )
+            
            ),
-           textOutput('unHelped')
            
+           h3("Refugees Coming in Country for Asylum"),
+           tableOutput('in.country'),
+           textOutput('in.text'),
            
-           
+           h3("Refugees Leaving Country Seeking Asylum"),
+           tableOutput('out.country'),
+           textOutput('out.text')
            
  )
 )
