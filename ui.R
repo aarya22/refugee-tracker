@@ -12,7 +12,7 @@ vars <- c(
   "Population" = "adultpop"
 )
 
-navbarPage("Refugee-Tracker", id="nav", theme = shinytheme("yeti"),
+navbarPage("Refugee Tracker", id="nav", theme = shinytheme("superhero"),
            
   tabPanel("Interactive map",
     div(class="outer",
@@ -41,6 +41,7 @@ navbarPage("Refugee-Tracker", id="nav", theme = shinytheme("yeti"),
     )
   ),
   
+  #ui for Information tab
   tabPanel("Information",
            sidebarPanel(
              

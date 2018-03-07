@@ -45,17 +45,21 @@ server <- function(input, output) {
       )
   })
   
+#Information tab
+  
+  #reactive data for asylum seekers coming into country
   filtered.in <- reactive({
     asylum.in.grouped <- filter(asylum.in.grouped, year == input$yearInput
                                 & country == input$countryInput) 
   })
   
+  #reactive data for asylum seekers leaving country
   filtered.out <- reactive({
     asylum.out.grouped <- filter(asylum.out.grouped, year == input$yearInput &
                                    origin == input$countryInput) 
   })
 
-  
+  #output text explaining data for asylum seekers coming in 
   output$in.text <- renderText({
 
     paste0("In the beginning of ", input$yearInput,  
@@ -69,6 +73,7 @@ server <- function(input, output) {
     
   })
   
+  #output text explaining data for asylum seekers leaving country
   output$out.text <- renderText({
     
     paste0("In the beginning of ", input$yearInput,  
@@ -82,19 +87,20 @@ server <- function(input, output) {
     
   })
 
+  #output data for asylum seekers coming into country
   output$in.country <- renderTable({
-
+    
     filtered.in() %>% 
       select(people.in, un.helped)
     
   })
   
+  #output data for asylum seekers leaving country
   output$out.country <- renderTable({
     
     filtered.out() %>% 
       select(people.out, un.helped)
     
   })
-
 }
   
