@@ -45,28 +45,56 @@ server <- function(input, output) {
   
   time.series <- read.csv('data/time_series.csv', stringsAsFactors = FALSE, fileEncoding
                           = "UTF-8-BOM")
+  #browser()
   
   # How to organize the dataframe
   # 1. Combine all of the values for the same countries regardless of the type of refugeee for EACH YEAR
   # 2. Sort by descending order (Highest to lowest)
-  new.order <- arrange(time.series, Value)
+  new.order <- arrange(time.series, Value) 
+  #new.order(complete.cases(1,),)
     
   # Create a table
   output$ranking <- renderTable({
     # If user clicks kilotons in the widget
     if (input$Direction == 'In') {
       # Filter the columns of interest
-      in.year <- filter(time.series, Year == input$year)
-      in.data <- arrange(in.year, desc(Value))%>%
-        select(Year, Country...territory.of.asylum.residence, Origin, Value)
+      # browser()
+      in.year <- filter(time.series, Year == input$year, Population.type == input$Type)
+      if (nrow(in.year) == 0){
+        none <- "No data available"
+        return(none)
+      }
+      in.year[,5] <- sapply(in.year[,5], as.numeric)
+      in.data <- arrange(in.year, desc(Value))
+      order.Value <- in.data$Value
+      in.data$Rank <- NA
+      in.data$Rank <- 1:nrow(in.data)
+      colnames(in.data)[2] <- "Country"
+      in.data[,5] <- sapply(in.data[,5], as.character)
+      in.data <- select(in.data, Rank, Country, Population.type, Value)
+      if (nrow(in.data) == 0){
+        none <- print("No data available")
+        return(none)
+      }
       return(in.data)
       
       # User clicks "outgoing" in the widget
     } else {
       # Filter the columns of interest
-      out.year <- filter(time.series, Year == input$year)
-      out.data <- arrange(out.year, desc(Value))%>%
-        select(Year, Country...territory.of.asylum.residence, Origin, Value)
+      out.year <- filter(time.series, Year == input$year, Population.type == input$Type)
+      if (nrow(out.year) == 0){
+        none <- "No data available"
+        return(none)
+      }
+      out.year[,5] <- sapply(out.year[,5], as.numeric)
+      out.data <- arrange(out.year, desc(Value))
+      order.Value <- out.data$Value
+      out.data$Rank <- NA
+      out.data$Rank <- 1:nrow(out.data)
+      colnames(out.data)[2] <- "Country"
+      colnames(out.data)[5] <- "Leaving"
+      out.data[,5] <- sapply(out.data[,5], as.character)
+      out.data <- select(out.data, Rank, Origin, Population.type, Leaving)
       return(out.data)
     }
   })

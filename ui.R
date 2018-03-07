@@ -113,10 +113,20 @@ navbarPage("Refugee-Tracker", id="nav",
                            "2015" = '2015',
                            "2016" = '2016')),
                          
-    # Input: Use radiobuttons to select unit of measurement
-    radioButtons(input = 'Direction', label = 'Select outgoing or incoming refugee data', 
-      choices = c('In' = 'In', 'Out' = 'Out')
-      , selected = 'Out')
+    # Input: Use dropdown to select unit of measurement
+    selectInput(input = 'Direction', label = "Select outgoing or incoming refugee data:", 
+                choices = list('In' = 'In', 
+                               'Out'= 'Out')),
+    
+    # Input: Use dropdown to select unit of measurement
+    selectInput(input = 'Type', label = "Select type of refugee:", 
+                choices = list('Refugees (incl. refugee-like situations)' = 'Refugees (incl. refugee-like situations)',
+                               "Returnees" = 'Returnees',
+                               "Returned IDPs" = 'Returned IDPs',
+                               "Stateless" = 'Stateless',
+                               "Asylum-seekers" = 'Asylum-seekers',
+                               "Others of concern" = 'Others of concern',
+                               'Internally displaced persons'= 'Internally displaced persons'))
+      )
     )
-  )
 )
