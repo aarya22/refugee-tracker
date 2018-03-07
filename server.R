@@ -35,7 +35,6 @@ server <- function(input, output) {
                    pending = Tota.pending.start.year + Total.pending.end.year,
                    recognized = decisions_recognized + decisions_other,
                    rejected = Rejected + Otherwise.closed)
-  
   world <- geojsonio::geojson_read("json/countries.geo.json", what = "sp")
   
   # # Examples to demonstrate lines
@@ -113,7 +112,6 @@ server <- function(input, output) {
   }
   
   showRefugeeLines <- function(country, year, direction) {
-
     query.in <- as.data.frame(filter(refugee, 
                                      refugee$Country...territory.of.asylum.residence == country, 
                                      refugee$Year==year))
@@ -124,6 +122,7 @@ server <- function(input, output) {
     if (length(query.in$Origin) == 0 && direction != "Outgoing") {
       # Have to output no data available
       showNotification("No Incoming Data Available", type = "error")
+      return()
     } else if(direction != "Outgoing") {
       origin.countries <- query.in$Origin
       country <- query.in$Country...territory.of.asylum.residence[1]
@@ -137,13 +136,15 @@ server <- function(input, output) {
       origin.coords <- origin.coords[empty.vals]
       origin.countries <- origin.countries[empty.vals]
       
-      origin.dat <- query.in$Value[empty.vals]
-      dec <- as.numeric(unlist(origin.dat))
-      browser()
       coord.df.in <- getLatLong(origin.countries, origin.coords, host.coords)
       lines.in <- points_to_line(coord.df.in, "long", "lat", "group")
       
-      cnames <- countrycode(names(lines.in), "iso3c", "country.name")
+      query.in <- query.in[query.in$Origin %in% names(lines.in),]
+      lines.in.vec <- match(names(lines.in), query.in$Origin)
+      q <- query.in[lines.in.vec,]
+      dec <- as.numeric(unlist(q$Value))
+      
+      cnames <- countrycode(q$Origin, "iso3c", "country.name")
       
       labels = sprintf("<strong>%s</strong><br/>%g refugees incoming", cnames, dec) %>% lapply(htmltools::HTML)
       
@@ -166,9 +167,10 @@ server <- function(input, output) {
     if (length(query.out$Origin) == 0 && direction != "Incoming") {
       # Have to output no data available
       showNotification("No Outgoing Data Available", type="error")
+      return()
     } else if(direction != "Incoming") {
-      origin.countries <- query$Country...territory.of.asylum.residence
-      country <- query$Origin
+      origin.countries <- query.out$Country...territory.of.asylum.residence
+      country <- query.out$Origin[1]
       
       # Get origin countries lat/long
       origin.coords <- lapply(origin.countries, get_coords)
@@ -184,8 +186,13 @@ server <- function(input, output) {
       
       coord.df.out <- getLatLong(origin.countries, origin.coords, host.coords)
       lines.out <- points_to_line(coord.df.out, "long", "lat", "group")
+      #browser()
+      query.out <- query.out[query.out$Country...territory.of.asylum.residence %in% names(lines.out),]
+      lines.out.vec <- match(names(lines.out), query.out$Country...territory.of.asylum.residence)
+      q <- query.out[lines.out.vec,]
+      dec <- as.numeric(unlist(q$Value))
       
-      cnames <- countrycode(query.out$Origin, "iso3c", "country.name")
+      cnames <- countrycode(q$Country...territory.of.asylum.residence, "iso3c", "country.name")
       
       labels = sprintf("<strong>%s</strong><br/>%g refugees outgoing", cnames, dec) %>% lapply(htmltools::HTML)
       
@@ -250,7 +257,7 @@ server <- function(input, output) {
   })
   
   showAsylumLines <- function(country, year, decision) {
-    
+    #browser()
     if (decision == "All") {
       decision = "Total.decisions" #Make all into sum of recognized, rejected, un.assist and pending
     } else if (decision == "Recognized") {
@@ -267,14 +274,15 @@ server <- function(input, output) {
                                   asylum$Country...territory.of.asylum.residence == country, 
                                   asylum$Year==year) %>% select(Year, Country...territory.of.asylum.residence, Origin, decision))
     query <- query[complete.cases(query), ]
-    
-    query <- aggregate(. ~ Country...territory.of.asylum.residence + Origin + Year, data = query, sum)
+    names(query)[4] <- "decision"
     query <- filter(query, decision > 0)
     
     if (length(query$Origin) == 0) {
       showNotification("No Data Available", type = "error")
       return()
     }
+    
+    query <- aggregate(. ~ Country...territory.of.asylum.residence + Origin + Year, data = query, sum)
     
     origin.countries <- query$Origin
     country <- query$Country...territory.of.asylum.residence[1]
@@ -288,16 +296,18 @@ server <- function(input, output) {
     origin.coords <- origin.coords[empty.vals]
     origin.countries <- origin.countries[empty.vals]
     
-    names(query)[4] <- "decision"
     origin.dat <- query$decision[empty.vals]
     dec <- as.numeric(unlist(origin.dat))
     
-    browser()
     coord.df <- getLatLong(origin.countries, origin.coords, host.coords)
     lines <- points_to_line(coord.df, "long", "lat", "group")
     
-    #origin.countries <- query$Origin[!is.na(origin.countries)]
-    cnames <- countrycode(origin.countries, "iso3c", "country.name")
+    query <- query[query$Origin %in% names(lines),]
+    lines.vec <- match(names(lines), query$Origin)
+    q <- query[lines.vec,]
+    dec <- as.numeric(unlist(q$decision))
+    
+    cnames <- countrycode(q$Origin, "iso3c", "country.name")
     
     labels = sprintf("<strong>%s</strong><br/>%g applications", cnames, dec) %>% lapply(htmltools::HTML)
     
