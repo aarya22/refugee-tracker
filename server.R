@@ -99,7 +99,7 @@ server <- function(input, output) {
   output$graph <- renderTable({
     graph.values <- read.csv('data/time_series.csv', stringsAsFactors = FALSE, fileEncoding
                             = "UTF-8-BOM")
-    graph.values <- filter(time.series, time.series$Country...territory.of.asylum.residence == input$Country,
+    graph.values <- filter(graph.values, graph.values$Country...territory.of.asylum.residence == input$Country,
                           graph.values$Population.type == input$Type)
     
     graph.values.grouped <- aggregate(x = graph.values$Value, by = list(graph.values$Year), FUN = sum)%>%
