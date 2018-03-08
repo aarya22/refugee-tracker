@@ -4,6 +4,7 @@ library("dplyr")
 library("geojsonio")
 library("maps")
 library("countrycode")
+library("ggplot2")
 
 server <- function(input, output) {
   
@@ -30,12 +31,8 @@ server <- function(input, output) {
   asylum <- read.csv("data/asylum_seekers_map.csv", stringsAsFactors = FALSE)
   demo1 <- read.csv("data/demographics_agg.csv", stringsAsFactors = FALSE)
   world.cities <- read.csv("data/world.cities.csv", stringsAsFactors = FALSE)
-  time.series <- read.csv('data/time_series.csv', stringsAsFactors = FALSE, fileEncoding
-                          = "UTF-8-BOM")
   asylum.in.grouped <- read.csv("data/asylum.in.grouped.csv", stringsAsFactors = FALSE)
   asylum.out.grouped <- read.csv("data/asylum.out.grouped.csv", stringsAsFactors = FALSE)
-  graph.values <- read.csv('data/time_series.csv', stringsAsFactors = FALSE, fileEncoding
-                           = "UTF-8-BOM")
   time.series <- read.csv('data/time_series.csv', stringsAsFactors = FALSE, fileEncoding
                           = "UTF-8-BOM")
   time.series[time.series=="*"]<-NA
@@ -152,11 +149,11 @@ server <- function(input, output) {
   #new.order(complete.cases(1,),)
     
   # Create a table
-  output$ranking <- renderTable({
-    # If user clicks kilotons in the widget
-    if (input$Direction == 'In') {
+  output$ranking <- renderDataTable({
+    # If user chooses in direction
+    if (input$rDirection == 'In') {
       # Filter the columns of interest
-      in.year <- filter(time.series, Year == input$year, Population.type == input$Type)
+      in.year <- filter(time.series, Year == input$year, Population.type == input$rType)
   
       if (nrow(in.year) < 1){
         showNotification("No data available", type = "error")
@@ -167,7 +164,7 @@ server <- function(input, output) {
       colnames(in.year)[2] <- "Country"
       colnames(in.year)[3] <- "Value"
       in.data <- arrange(in.year, desc(Value))
-      in.data <- in.data[1:20,]
+      #in.data <- in.data[1:20,]
       order.Value <- in.data$Value
       in.data$Rank <- NA
       in.data$Rank <- 1:nrow(in.data)
@@ -179,7 +176,7 @@ server <- function(input, output) {
     } else {
       # Filter the columns of interest
       #browser()
-      out.year <- filter(time.series, Year == input$year, Population.type == input$Type)
+      out.year <- filter(time.series, Year == input$year, Population.type == input$rType)
       if (nrow(out.year) < 1) {
         showNotification("No data available", type = "error")
         return()
@@ -189,7 +186,7 @@ server <- function(input, output) {
       colnames(out.year)[2] <- "Country"
       colnames(out.year)[3] <- "Value"
       out.data <- arrange(out.year, desc(Value))
-      out.data <- out.data[1:20, ]
+      #out.data <- out.data[1:20, ]
       order.Value <- out.data$Value
       out.data$Rank <- NA
       out.data$Rank <- 1:nrow(out.data)
@@ -202,8 +199,9 @@ server <- function(input, output) {
   })
   
   output$graph <- renderPlot({
-    graph.values <- filter(time.series, time.series$Country...territory.of.asylum.residence == input$Country,
-                           time.series$Population.type == input$Type)
+    graph.values <- filter(time.series, time.series$Country...territory.of.asylum.residence == input$gCountry,
+                           time.series$Population.type == input$gType)
+    
     if(nrow(graph.values) < 1) {
       showNotification("No data available", type = "error")
       return()
@@ -215,59 +213,18 @@ server <- function(input, output) {
       na.omit(graph.values.grouped)
     colnames(graph.values.grouped)[1] <- "Year"
     colnames(graph.values.grouped)[2] <- "Value"
+    t <- paste(input$gCountry, " (", input$gType,")", sep = "")
     
-    #graph.values[,1] <- sapply(graph.values[,1], as.numeric)
+    mytheme <- theme(plot.title = element_text(family = "Helvetica", face = "bold", size = (15)), 
+                    axis.title = element_text(family = "Helvetica", size = (10), colour = "steelblue4"),
+                    axis.text = element_text(family = "Courier", colour = "cornflowerblue", size = (10)))
+
+    p <- ggplot(data = graph.values.grouped) +
+          geom_point(mapping = aes(x = Year, y = Value), color = "blue") +
+          geom_line(mapping = aes(x = Year, y = Value), color = "blue")
     
-    ggplot(data = graph.values.grouped) +
-      geom_point(mapping = aes(x = Year, y = Value), color = "blue") +
-      geom_line(mapping = aes(x = Year, y = Value), color = "blue")
-  })
-}
-    
-  # Create a table
-  output$ranking <- renderTable({
-    # If user clicks kilotons in the widget
-    if (input$Direction == 'In') {
-      # Filter the columns of interest
-      # browser()
-      in.year <- filter(time.series, Year == input$year, Population.type == input$Type)
-      if (nrow(in.year) == 0){
-        none <- "No data available"
-        return(none)
-      }
-      in.year[,5] <- sapply(in.year[,5], as.numeric)
-      in.data <- arrange(in.year, desc(Value))
-      order.Value <- in.data$Value
-      in.data$Rank <- NA
-      in.data$Rank <- 1:nrow(in.data)
-      colnames(in.data)[2] <- "Country"
-      in.data[,5] <- sapply(in.data[,5], as.character)
-      in.data <- select(in.data, Rank, Country, Population.type, Value)
-      if (nrow(in.data) == 0){
-        none <- print("No data available")
-        return(none)
-      }
-      return(in.data)
-      
-      # User clicks "outgoing" in the widget
-    } else {
-      # Filter the columns of interest
-      out.year <- filter(time.series, Year == input$year, Population.type == input$Type)
-      if (nrow(out.year) == 0){
-        none <- "No data available"
-        return(none)
-      }
-      out.year[,5] <- sapply(out.year[,5], as.numeric)
-      out.data <- arrange(out.year, desc(Value))
-      order.Value <- out.data$Value
-      out.data$Rank <- NA
-      out.data$Rank <- 1:nrow(out.data)
-      colnames(out.data)[2] <- "Country"
-      colnames(out.data)[5] <- "Leaving"
-      out.data[,5] <- sapply(out.data[,5], as.character)
-      out.data <- select(out.data, Rank, Origin, Population.type, Leaving)
-      return(out.data)
-    }
+    p <- p + mytheme + labs(title = t, y=input$gType, x = "Year") + theme_minimal()
+    print(p)
   })
 
   # Gets the coordinates of a given country

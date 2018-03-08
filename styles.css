@@ -31,7 +31,7 @@ h1, h2, h3, h4 { font-weight: 400; }
 
 #controls-refugee {
   /* Appearance */
-  background-color: white;
+  background-color: #2B3E4F;
   padding: 0 20px 20px 20px;
   cursor: move;
   /* Fade out while not hovering */
@@ -48,7 +48,7 @@ h1, h2, h3, h4 { font-weight: 400; }
 
 #controls-asylum {
   /* Appearance */
-  background-color: white;
+  background-color: #2B3E4F;
   padding: 0 20px 20px 20px;
   cursor: move;
   /* Fade out while not hovering */
@@ -65,7 +65,21 @@ h1, h2, h3, h4 { font-weight: 400; }
 
 #controls-summary {
   /* Appearance */
-  background-color: gray;
+  background-color: #2B3E4F;
+  padding: 0 20px 20px 20px;
+  cursor: move;
+}
+
+#controls-graph {
+  /* Appearance */
+  background-color: #2B3E4F;
+  padding: 0 20px 20px 20px;
+  cursor: move;
+}
+
+#controls-ranking {
+  /* Appearance */
+  background-color: #2B3E4F;
   padding: 0 20px 20px 20px;
   cursor: move;
 }
