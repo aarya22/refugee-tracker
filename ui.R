@@ -67,6 +67,8 @@ navbarPage("Refugee-Tracker", id="nav",
                
                htmlOutput("reftitle"),
                
+               plotOutput("refbar", height = 500, width = 500),
+               
                absolutePanel(id = "controls-summary", class = "panel panel-default", fixed = TRUE,
                              draggable = FALSE, top = 60, left = "auto", right = 20, bottom = "auto",
                              width = 330, height = "auto",
@@ -78,12 +80,7 @@ navbarPage("Refugee-Tracker", id="nav",
                              
                              selectInput("sumYears", "Year", c(2001:2016))
                )
-           ),
-           
-           div(class="bar",
-               plotOutput("refbar", height = 500, width = 500)
            )
-           
        )
   
 )

@@ -339,7 +339,7 @@ server <- function(input, output) {
   })
   
   output$reftitle <- renderUI({
-    title <- paste("    ",input$Country, "in", input$sumYears)
+    title <- paste(input$Country, "in", input$sumYears)
     HTML(paste("<h1>",title,"</h1>", sep=""))
   })
   
