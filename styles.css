@@ -12,6 +12,16 @@ div.outer {
   padding: 0;
 }
 
+div.summary {
+  position: fixed;
+  top: 41px;
+  left: 30px;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  padding: 0;
+}
+
 /* Customize fonts */
 body, label, input, button, select { 
   font-family: 'Helvetica Neue', Helvetica;
@@ -19,7 +29,7 @@ body, label, input, button, select {
 }
 h1, h2, h3, h4 { font-weight: 400; }
 
-#controls {
+#controls-refugee {
   /* Appearance */
   background-color: white;
   padding: 0 20px 20px 20px;
@@ -29,10 +39,35 @@ h1, h2, h3, h4 { font-weight: 400; }
   zoom: 0.9;
   transition: opacity 500ms 1s;
 }
-#controls:hover {
+
+#controls-refugee:hover {
   /* Fade in while hovering */
   opacity: 0.95;
   transition-delay: 0;
+}
+
+#controls-asylum {
+  /* Appearance */
+  background-color: white;
+  padding: 0 20px 20px 20px;
+  cursor: move;
+  /* Fade out while not hovering */
+  opacity: 0.65;
+  zoom: 0.9;
+  transition: opacity 500ms 1s;
+}
+
+#controls-asylum:hover {
+  /* Fade in while hovering */
+  opacity: 0.95;
+  transition-delay: 0;
+}
+
+#controls-summary {
+  /* Appearance */
+  background-color: gray;
+  padding: 0 20px 20px 20px;
+  cursor: move;
 }
 
 /* If not using map tiles, show a white background */
