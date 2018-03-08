@@ -9,11 +9,11 @@ Data from the United Nations available [here](https://www.kaggle.com/unitednatio
 
 Package dependencies (install before running): 
 
-install.packages('leaflet')
-install.packages('geojsonio')
-install.packages('dplyr')
-install.packages('shiny')
-install.packages('maps')
-install.packages('countrycode')
-install.packages('ggplot2')
-install.packages('shinythemes')
+  install.packages('leaflet')
+  install.packages('geojsonio')
+  install.packages('dplyr')
+  install.packages('shiny')
+  install.packages('maps')
+  install.packages('countrycode')
+  install.packages('ggplot2')
+  install.packages('shinythemes')
