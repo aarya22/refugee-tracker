@@ -112,8 +112,8 @@ tabPanel("Asylum Map",
      )
    ),
   
-   tabPanel("Country Summary",
-           div(class="summary",
+   tabPanel("Country Summary", 
+           div(class="summary", style = "overflow-y:scroll; max-height: 600px",
                
                tags$head(
                  # Include our custom CSS
@@ -122,9 +122,17 @@ tabPanel("Asylum Map",
                
                htmlOutput("reftitle"),
                
+               h3("Refugees Coming in Country for Asylum"),
+               tableOutput('in.country'),
+               textOutput('in.text'),
+               
+               h3("Refugees Leaving Country Seeking Asylum"),
+               tableOutput('out.country'),
+               textOutput('out.text'),
+               
                plotOutput("refbar", height = 500, width = 500),
                
-               absolutePanel(id = "controls-summary", class = "panel panel-default", fixed = TRUE,
+               absolutePanel(id = "controls-summary", class = "panel panel-default", fixed = FALSE,
                              draggable = FALSE, top = 60, left = "auto", right = 20, bottom = "auto",
                              width = 330, height = "auto",
                              
@@ -133,16 +141,8 @@ tabPanel("Asylum Map",
                              selectInput("countryInput", "Select Country",
                                          choices = unique(as.character(asylum.in.grouped$country))),
                              
-                             selectInput("yearInput", "Year", c(2001:2016))
-               ),
-               
-               h3("Refugees Coming in Country for Asylum"),
-               tableOutput('in.country'),
-               textOutput('in.text'),
-               
-               h3("Refugees Leaving Country Seeking Asylum"),
-               tableOutput('out.country'),
-               textOutput('out.text')
+                             selectInput("yearInput", "Select Year", c(2001:2016))
+               )
                
            )
        )

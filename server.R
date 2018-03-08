@@ -456,7 +456,7 @@ server <- function(input, output) {
     lbls <- c("Female (0-17)", "Female (18+)", "Female (Unknown)", "Male (0-17)", "Male (18+)", "Male (Unknown)")
     title <- paste("Refugee Demographics of", input$countryInput,"in", input$yearInput)
     color <- c("red", "red", "red", "blue", "blue", "blue")
-    bar <- barplot(slices,xlab = "Category",ylab = "Refugees",col = color,
+    bar <- barplot(slices,xlab = "Category",ylab = "# of Refugees",col = color,
                    main = title)
     text(x=bar[,1], y=-1, adj=c(1, 1), lbls, cex=0.8, srt=45, xpd=TRUE)
   })
