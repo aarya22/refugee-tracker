@@ -1,6 +1,9 @@
 library(sp)
 library(maptools)
 
+# Adapted from 
+# https://stackoverflow.com/questions/32275213/how-do-i-connect-two-coordinates-with-a-line-using-leaflet-in-r
+
 points_to_line <- function(data, long, lat, id_field = NULL, sort_field = NULL) {
   
   # Convert to SpatialPointsDataFrame
