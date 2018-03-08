@@ -4,8 +4,10 @@ library("dplyr")
 library("geojsonio")
 library('plotly')
 
-source('index.R')
 server <- function(input, output) {
+  
+  asylum.in.grouped <- read.csv("data/asylum.in.grouped.csv", stringsAsFactors = FALSE)
+  asylum.out.grouped <- read.csv("data/asylum.out.grouped.csv", stringsAsFactors = FALSE)
   
   world <- geojsonio::geojson_read("json/countries.geo.json", what = "sp")
   
@@ -89,8 +91,9 @@ server <- function(input, output) {
 
   #output data for asylum seekers coming into country
   output$in.country <- renderTable({
+    browser()
     filter.in <-filtered.in()
-    names(filter.in)[3:4] <- c("# of People Entering Country",
+    names(filter.in)[4:5] <- c("# of People Entering Country",
                                "# of People that UN Helped")
     select(filter.in, "# of People Entering Country", "# of People that UN Helped")
     
@@ -100,7 +103,7 @@ server <- function(input, output) {
   output$out.country <- renderTable({
     
     filter.out <- filtered.out()    
-    names(filter.out)[3:4] <- c("# of People Leaving Country",
+    names(filter.out)[4:5] <- c("# of People Leaving Country",
                                                   "# of People that UN Helped")
     select(filter.out, "# of People Leaving Country",
            "# of People that UN Helped")
