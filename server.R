@@ -68,9 +68,11 @@ server <- function(input, output) {
           ", there were about ", filtered.in()$people.in,
            " asylum seekers that were from ", input$countryInput, 
           " who were seeking asylum in a different country. Out of those seekers,",
-          "the United Nations provided assitance to about ", round(filtered.in()$un.help.percent, 2),
+          "the United Nations provided assitance to about ", 
+          round(filtered.in()$un.help.percent, 2),
           "% of the refugees.  Note: The column \" un.helped \" displays the total number",
-          " of refugees that the UN helped in that year for that country.")
+          " of refugees that the UN helped in that year for that country. 
+          If table is empty, there is no data found for that  year or country")
     
     
   })
@@ -91,7 +93,6 @@ server <- function(input, output) {
 
   #output data for asylum seekers coming into country
   output$in.country <- renderTable({
-    browser()
     filter.in <-filtered.in()
     names(filter.in)[4:5] <- c("# of People Entering Country",
                                "# of People that UN Helped")

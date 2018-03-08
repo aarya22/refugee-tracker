@@ -2,8 +2,6 @@ library("leaflet")
 library("shiny")
 library('shinythemes')
 
-#source('index.R')
-
 vars <- c(
   "Is SuperZIP?" = "superzip",
   "Centile score" = "centile",
