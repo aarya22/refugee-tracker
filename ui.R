@@ -43,6 +43,8 @@ navbarPage("Refugee Tracker", id="nav", theme = shinytheme("superhero"),
   
   #ui for Information tab
   tabPanel("Information",
+           titlePanel("Asylum Seeker Data by Country"),
+           
            sidebarPanel(
              
              sliderInput("yearInput", "Choose Year",

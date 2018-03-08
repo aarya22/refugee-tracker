@@ -66,7 +66,7 @@ server <- function(input, output) {
           ", there were about ", filtered.in()$people.in,
            " refugees that were from ", input$countryInput, 
           " who were seeking asylum in a different country. Out of those refugees,",
-          "the United Nations provided assitance to about ", round(filtered.out()$un.help.percent, 2),
+          "the United Nations provided assitance to about ", round(filtered.in()$un.help.percent, 2),
           "% of the refugees.  Note: The column \" un.helped \" displays the total number",
           " of refugees that the UN helped in that year for that country.")
     
@@ -77,10 +77,10 @@ server <- function(input, output) {
   output$out.text <- renderText({
     
     paste0("In the beginning of ", input$yearInput,  
-           ", there were about ", filtered.in()$people.in,
+           ", there were about ", filtered.out()$people.out,
            " refugees that came to ", input$countryInput, 
            " who were seeking asylum. Out of those refugees,",
-           "the United Nations provided assitance to about ", round(filtered.out()$un.help.percent, 2),
+           "the United Nations provided assitance to about ", filtered.out()$un.help.percent,
            "% of the refugees.  Note: The column \" un.helped \" displays the total number",
            " of refugees that the UN helped in that year for that country.")
     
