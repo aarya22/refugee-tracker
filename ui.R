@@ -122,15 +122,17 @@ tabPanel("Asylum Map",
                
                htmlOutput("reftitle"),
                
+               h3("Refugee Demographics"),
+               plotOutput("refbar", height = 550, width = 500),
+               htmlOutput("bartext"),
+               
                h3("Refugees Coming in Country for Asylum"),
                tableOutput('in.country'),
-               textOutput('in.text'),
+               htmlOutput('in.text'),
                
                h3("Refugees Leaving Country Seeking Asylum"),
                tableOutput('out.country'),
-               textOutput('out.text'),
-               
-               plotOutput("refbar", height = 500, width = 500),
+               htmlOutput('out.text'),
                
                absolutePanel(id = "controls-summary", class = "panel panel-default", fixed = FALSE,
                              draggable = FALSE, top = 60, left = "auto", right = 20, bottom = "auto",
