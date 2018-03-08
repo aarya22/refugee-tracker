@@ -1,9 +1,10 @@
 library("leaflet")
 library("shiny")
+library('shinythemes')
 
 months <- c("All", month.name)
 
-navbarPage("Refugee-Tracker", id="nav",
+navbarPage("Refugee Tracker", id="nav", theme = shinytheme("superhero"),
            
   tabPanel("Refugee Map",
     div(class="outer",
@@ -120,7 +121,33 @@ navbarPage("Refugee-Tracker", id="nav",
                                'Internally displaced persons'= 'Internally displaced persons'))
       )
     )
-)
+  ),
+  
+  #ui for Information tab
+  tabPanel("Information",
+           titlePanel("Asylum Seeker Data by Country"),
+           
+           sidebarPanel(
+             
+             sliderInput("yearInput", "Choose Year",
+                         min = 2001, max = 2016,
+                         value = 2001, sep = ""),
+             
+             selectInput("countryInput", "Select Country",
+                         choices = unique(as.character(asylum.in.grouped$country))
+             )
+            
+           ),
+           
+           h3("Refugees Coming in Country for Asylum"),
+           tableOutput('in.country'),
+           textOutput('in.text'),
+           
+           h3("Refugees Leaving Country Seeking Asylum"),
+           tableOutput('out.country'),
+           textOutput('out.text')
+           
+),
 
 tabPanel("Asylum Map",
     div(class="outer",
@@ -175,5 +202,4 @@ tabPanel("Asylum Map",
                )
            )
        )
-  
 )

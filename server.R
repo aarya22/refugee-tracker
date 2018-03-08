@@ -31,6 +31,9 @@ server <- function(input, output) {
   world.cities <- read.csv("data/world.cities.csv", stringsAsFactors = FALSE)
   time.series <- read.csv('data/time_series.csv', stringsAsFactors = FALSE, fileEncoding
                           = "UTF-8-BOM")
+  asylum.in.grouped <- read.csv("data/asylum.in.grouped.csv", stringsAsFactors = FALSE)
+  asylum.out.grouped <- read.csv("data/asylum.out.grouped.csv", stringsAsFactors = FALSE)
+  
   world <- geojsonio::geojson_read("json/countries.geo.json", what = "sp")
   
   # # Examples to demonstrate lines
@@ -67,7 +70,71 @@ server <- function(input, output) {
       )
   })
   
+#Information tab
   
+  #reactive data for asylum seekers coming into country
+  filtered.in <- reactive({
+    asylum.in.grouped <- filter(asylum.in.grouped, year == input$yearInput
+                                & country == input$countryInput) 
+  })
+  
+  #reactive data for asylum seekers leaving country
+  filtered.out <- reactive({
+    asylum.out.grouped <- filter(asylum.out.grouped, year == input$yearInput &
+                                   origin == input$countryInput) 
+  })
+
+  #output text explaining data for asylum seekers coming in 
+  output$in.text <- renderText({
+
+    paste0("In the beginning of ", input$yearInput,  
+          ", there were about ", filtered.in()$people.in,
+           " asylum seekers that were from ", input$countryInput, 
+          " who were seeking asylum in a different country. Out of those seekers,",
+          "the United Nations provided assitance to about ", 
+          round(filtered.in()$un.help.percent, 2),
+          "% of the refugees.  Note: The column \" un.helped \" displays the total number",
+          " of refugees that the UN helped in that year for that country. 
+          If table is empty, there is no data found for that  year or country.")
+    
+    
+  })
+  
+  #output text explaining data for asylum seekers leaving country
+  output$out.text <- renderText({
+    
+    paste0("In the beginning of ", input$yearInput,  
+           ", there were about ", filtered.out()$people.out,
+           " asylum seekers that came to ", input$countryInput, 
+           " who were seeking asylum. Out of those seekers,",
+           "the United Nations provided assitance to about ", filtered.out()$un.help.percent,
+           "% of the refugees.  Note: The column \" un.helped \" displays the total number",
+           " of refugees that the UN helped in that year for that country.")
+    
+    
+  })
+
+  #output data for asylum seekers coming into country
+  output$in.country <- renderTable({
+    filter.in <-filtered.in()
+    names(filter.in)[4:5] <- c("# of People Entering Country",
+                               "# of People that UN Helped")
+    select(filter.in, "# of People Entering Country", "# of People that UN Helped")
+    
+  })
+  
+  #output data for asylum seekers leaving country
+  output$out.country <- renderTable({
+    
+    filter.out <- filtered.out()    
+    names(filter.out)[4:5] <- c("# of People Leaving Country",
+                                                  "# of People that UN Helped")
+    select(filter.out, "# of People Leaving Country",
+           "# of People that UN Helped")
+    
+  })
+}
+    
   #browser()
   
   # How to organize the dataframe
