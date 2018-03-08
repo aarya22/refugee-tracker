@@ -1,9 +1,11 @@
 library("leaflet")
 library("shiny")
+library('shinythemes')
 
 months <- c("All", month.name)
+asylum.in.grouped <- read.csv("data/asylum.in.grouped.csv", stringsAsFactors = FALSE)
 
-navbarPage("Refugee-Tracker", id="nav",
+navbarPage("Refugee Tracker", id="nav", theme = shinytheme("superhero"),
            
   tabPanel("Refugee Map",
     div(class="outer",
@@ -29,7 +31,60 @@ navbarPage("Refugee-Tracker", id="nav",
     )
   ),
   
-  tabPanel("Asylum Map",
+  tabPanel("Ranking", tableOutput("ranking"),
+      absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
+         draggable = TRUE, top = 60, left = "auto", right = 20, bottom = "auto",
+         width = 330, height = "auto",
+                         
+         h2("ZIP explorer"),
+                         
+         # Input: dropdown menu to select the year
+         selectInput(input = 'year', label = "Select Year:", choices = c(1951:2016)),
+                         
+         # Input: Use dropdown to select unit of measurement
+         selectInput(input = 'Direction', label = "Select outgoing or incoming refugee data:", 
+                     choices = list('In' = 'In', 
+                                    'Out'= 'Out')),
+        
+         # Input: Use dropdown to select unit of measurement
+         selectInput(input = 'Type', label = "Select type of refugee:", 
+                     choices = list('Refugees (incl. refugee-like situations)' = 'Refugees (incl. refugee-like situations)',
+                                   "Returnees" = 'Returnees',
+                                   "Returned IDPs" = 'Returned IDPs',
+                                   "Stateless" = 'Stateless',
+                                   "Asylum-seekers" = 'Asylum-seekers',
+                                   "Others of concern" = 'Others of concern',
+                                   'Internally displaced persons'= 'Internally displaced persons'))
+    )
+  ),
+  
+  # #ui for Information tab
+  # tabPanel("Information",
+  #          titlePanel("Asylum Seeker Data by Country"),
+  #          
+  #          sidebarPanel(
+  #            
+  #            sliderInput("yearInput", "Choose Year",
+  #                        min = 2001, max = 2016,
+  #                        value = 2001, sep = ""),
+  #            
+  #            selectInput("countryInput", "Select Country",
+  #                        choices = unique(as.character(asylum.in.grouped$country))
+  #            )
+  #           
+  #          ),
+  #          
+  #          h3("Refugees Coming in Country for Asylum"),
+  #          tableOutput('in.country'),
+  #          textOutput('in.text'),
+  #          
+  #          h3("Refugees Leaving Country Seeking Asylum"),
+  #          tableOutput('out.country'),
+  #          textOutput('out.text')
+  #          
+  # ),
+
+tabPanel("Asylum Map",
     div(class="outer",
                
        tags$head(
@@ -75,12 +130,20 @@ navbarPage("Refugee-Tracker", id="nav",
                              
                              h2("Country Summary"),
                              
-                             selectInput("Country", "Country",
-                                         c("Afghanistan", "Sierra Leone")),
+                             selectInput("countryInput", "Select Country",
+                                         choices = unique(as.character(asylum.in.grouped$country))),
                              
-                             selectInput("sumYears", "Year", c(2001:2016))
-               )
+                             selectInput("yearInput", "Year", c(2001:2016))
+               ),
+               
+               h3("Refugees Coming in Country for Asylum"),
+               tableOutput('in.country'),
+               textOutput('in.text'),
+               
+               h3("Refugees Leaving Country Seeking Asylum"),
+               tableOutput('out.country'),
+               textOutput('out.text')
+               
            )
        )
-  
 )
