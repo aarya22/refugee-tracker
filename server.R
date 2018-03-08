@@ -72,7 +72,7 @@ server <- function(input, output) {
           round(filtered.in()$un.help.percent, 2),
           "% of the refugees.  Note: The column \" un.helped \" displays the total number",
           " of refugees that the UN helped in that year for that country. 
-          If table is empty, there is no data found for that  year or country")
+          If table is empty, there is no data found for that  year or country.")
     
     
   })
