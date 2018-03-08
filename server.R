@@ -65,17 +65,17 @@ server <- function(input, output) {
     if (input$Direction == 'In') {
       # Filter the columns of interest
       in.year <- filter(time.series, Year == input$year, Population.type == input$Type)
-      in.year <- in.year[1:20,]
-      
-      if (nrow(in.year) == 0){
-        none <- "No data available"
-        return(none)
+  
+      if (nrow(in.year) < 1){
+        showNotification("No data available", type = "error")
+        return()
       }
       in.year[,5] <- sapply(in.year[,5], as.numeric)
       in.year <- aggregate(x = in.year$Value, by = list(in.year$Year, in.year$Country...territory.of.asylum.residence), FUN = sum)
       colnames(in.year)[2] <- "Country"
       colnames(in.year)[3] <- "Value"
       in.data <- arrange(in.year, desc(Value))
+      in.data <- in.data[1:20,]
       order.Value <- in.data$Value
       in.data$Rank <- NA
       in.data$Rank <- 1:nrow(in.data)
@@ -86,17 +86,18 @@ server <- function(input, output) {
       # User clicks "outgoing" in the widget
     } else {
       # Filter the columns of interest
+      #browser()
       out.year <- filter(time.series, Year == input$year, Population.type == input$Type)
-      out.year <- out.year[1:20, ]
-      if (nrow(out.year)) {
-        none <- "No data available"
-        return(none)
+      if (nrow(out.year) < 1) {
+        showNotification("No data available", type = "error")
+        return()
       }
       out.year[,5] <- sapply(out.year[,5], as.numeric)
       out.year <- aggregate(x = out.year$Value, by = list(out.year$Year, out.year$Country...territory.of.asylum.residence), FUN = sum)
       colnames(out.year)[2] <- "Country"
       colnames(out.year)[3] <- "Value"
       out.data <- arrange(out.year, desc(Value))
+      out.data <- out.data[1:20, ]
       order.Value <- out.data$Value
       out.data$Rank <- NA
       out.data$Rank <- 1:nrow(out.data)
