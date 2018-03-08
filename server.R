@@ -64,8 +64,8 @@ server <- function(input, output) {
 
     paste0("In the beginning of ", input$yearInput,  
           ", there were about ", filtered.in()$people.in,
-           " refugees that were from ", input$countryInput, 
-          " who were seeking asylum in a different country. Out of those refugees,",
+           " asylum seekers that were from ", input$countryInput, 
+          " who were seeking asylum in a different country. Out of those seekers,",
           "the United Nations provided assitance to about ", round(filtered.in()$un.help.percent, 2),
           "% of the refugees.  Note: The column \" un.helped \" displays the total number",
           " of refugees that the UN helped in that year for that country.")
@@ -78,8 +78,8 @@ server <- function(input, output) {
     
     paste0("In the beginning of ", input$yearInput,  
            ", there were about ", filtered.out()$people.out,
-           " refugees that came to ", input$countryInput, 
-           " who were seeking asylum. Out of those refugees,",
+           " asylum seekers that came to ", input$countryInput, 
+           " who were seeking asylum. Out of those seekers,",
            "the United Nations provided assitance to about ", filtered.out()$un.help.percent,
            "% of the refugees.  Note: The column \" un.helped \" displays the total number",
            " of refugees that the UN helped in that year for that country.")
@@ -89,17 +89,21 @@ server <- function(input, output) {
 
   #output data for asylum seekers coming into country
   output$in.country <- renderTable({
-    
-    filtered.in() %>% 
-      select(people.in, un.helped)
+    filter.in <-filtered.in()
+    names(filter.in)[3:4] <- c("# of People Entering Country",
+                               "# of People that UN Helped")
+    select(filter.in, "# of People Entering Country", "# of People that UN Helped")
     
   })
   
   #output data for asylum seekers leaving country
   output$out.country <- renderTable({
     
-    filtered.out() %>% 
-      select(people.out, un.helped)
+    filter.out <- filtered.out()    
+    names(filter.out)[3:4] <- c("# of People Leaving Country",
+                                                  "# of People that UN Helped")
+    select(filter.out, "# of People Leaving Country",
+           "# of People that UN Helped")
     
   })
 }
