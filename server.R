@@ -34,6 +34,12 @@ server <- function(input, output) {
                           = "UTF-8-BOM")
   asylum.in.grouped <- read.csv("data/asylum.in.grouped.csv", stringsAsFactors = FALSE)
   asylum.out.grouped <- read.csv("data/asylum.out.grouped.csv", stringsAsFactors = FALSE)
+  graph.values <- read.csv('data/time_series.csv', stringsAsFactors = FALSE, fileEncoding
+                           = "UTF-8-BOM")
+  time.series <- read.csv('data/time_series.csv', stringsAsFactors = FALSE, fileEncoding
+                          = "UTF-8-BOM")
+  time.series[time.series=="*"]<-NA
+  time.series <- na.omit(time.series)
 
   world <- geojsonio::geojson_read("json/countries.geo.json", what = "sp")
   
@@ -144,6 +150,79 @@ server <- function(input, output) {
   # 2. Sort by descending order (Highest to lowest)
   new.order <- arrange(time.series, Value) 
   #new.order(complete.cases(1,),)
+    
+  # Create a table
+  output$ranking <- renderTable({
+    # If user clicks kilotons in the widget
+    if (input$Direction == 'In') {
+      # Filter the columns of interest
+      in.year <- filter(time.series, Year == input$year, Population.type == input$Type)
+  
+      if (nrow(in.year) < 1){
+        showNotification("No data available", type = "error")
+        return()
+      }
+      in.year[,5] <- sapply(in.year[,5], as.numeric)
+      in.year <- aggregate(x = in.year$Value, by = list(in.year$Year, in.year$Country...territory.of.asylum.residence), FUN = sum)
+      colnames(in.year)[2] <- "Country"
+      colnames(in.year)[3] <- "Value"
+      in.data <- arrange(in.year, desc(Value))
+      in.data <- in.data[1:20,]
+      order.Value <- in.data$Value
+      in.data$Rank <- NA
+      in.data$Rank <- 1:nrow(in.data)
+      in.data[,3] <- sapply(in.data[,3], as.character)
+      in.data <- select(in.data, Rank, Country, Value)
+      return(in.data)
+      
+      # User clicks "outgoing" in the widget
+    } else {
+      # Filter the columns of interest
+      #browser()
+      out.year <- filter(time.series, Year == input$year, Population.type == input$Type)
+      if (nrow(out.year) < 1) {
+        showNotification("No data available", type = "error")
+        return()
+      }
+      out.year[,5] <- sapply(out.year[,5], as.numeric)
+      out.year <- aggregate(x = out.year$Value, by = list(out.year$Year, out.year$Country...territory.of.asylum.residence), FUN = sum)
+      colnames(out.year)[2] <- "Country"
+      colnames(out.year)[3] <- "Value"
+      out.data <- arrange(out.year, desc(Value))
+      out.data <- out.data[1:20, ]
+      order.Value <- out.data$Value
+      out.data$Rank <- NA
+      out.data$Rank <- 1:nrow(out.data)
+      colnames(out.data)[2] <- "Origin"
+      colnames(out.data)[3] <- "Leaving"
+      out.data[,3] <- sapply(out.data[,3], as.character)
+      out.data <- select(out.data, Rank, Origin, Leaving)
+      return(out.data)
+    }
+  })
+  
+  output$graph <- renderPlot({
+    graph.values <- filter(time.series, time.series$Country...territory.of.asylum.residence == input$Country,
+                           time.series$Population.type == input$Type)
+    if(nrow(graph.values) < 1) {
+      showNotification("No data available", type = "error")
+      return()
+    }
+    
+    graph.values[,5] <- sapply(graph.values[,5], as.numeric)
+    
+    graph.values.grouped <- aggregate(x = graph.values$Value, by = list(graph.values$Year), FUN = sum)%>%
+      na.omit(graph.values.grouped)
+    colnames(graph.values.grouped)[1] <- "Year"
+    colnames(graph.values.grouped)[2] <- "Value"
+    
+    #graph.values[,1] <- sapply(graph.values[,1], as.numeric)
+    
+    ggplot(data = graph.values.grouped) +
+      geom_point(mapping = aes(x = Year, y = Value), color = "blue") +
+      geom_line(mapping = aes(x = Year, y = Value), color = "blue")
+  })
+}
     
   # Create a table
   output$ranking <- renderTable({

@@ -9,7 +9,6 @@ navbarPage("Refugee Tracker", id="nav", theme = shinytheme("superhero"),
            
   tabPanel("Refugee Map",
     div(class="outer",
-        
       tags$head(
           # Include our custom CSS
           includeCSS("styles.css")
@@ -39,6 +38,67 @@ navbarPage("Refugee Tracker", id="nav", theme = shinytheme("superhero"),
          h2("ZIP explorer"),
                          
          # Input: dropdown menu to select the year
+         selectInput(input = 'year', label = "Select Year:", 
+            choices = c(1951:2016)),
+                         
+    # Input: Use dropdown to select unit of measurement
+    selectInput(input = 'Direction', label = "Select outgoing or incoming refugee data:", 
+                choices = list('In' = 'In', 
+                               'Out'= 'Out')),
+    
+    # Input: Use dropdown to select unit of measurement
+    selectInput(input = 'Type', label = "Select type of refugee:", 
+                choices = list('Refugees (incl. refugee-like situations)' = 'Refugees (incl. refugee-like situations)',
+                               "Returnees" = 'Returnees',
+                               "Returned IDPs" = 'Returned IDPs',
+                               "Stateless" = 'Stateless',
+                               "Asylum-seekers" = 'Asylum-seekers',
+                               "Others of concern" = 'Others of concern',
+                               'Internally displaced persons'= 'Internally displaced persons'))
+      )
+    ),
+  tabPanel("Graph", plotOutput("graph"),
+           absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
+                         draggable = TRUE, top = 60, left = "auto", right = 20, bottom = "auto",
+                         width = 330, height = "auto",
+                         
+                         h2("ZIP explorer"),
+                         
+                         # Input: dropdown menu to select the year
+                         selectInput(input = 'Country', label = "Select Country:", 
+                                     choices = list('Australia' = 'Australia', 
+                                                    'Austria' = 'Austria', 
+                                                    'Belgium' = 'Belgium', 
+                                                    'Canada' = 'Canada', 
+                                                    'Switzerland' = 'Switzerland', 
+                                                    'Germany' = 'Germany', 
+                                                    'Denmark' = 'Denmark', 
+                                                    'Spain' = 'Spain', 
+                                                    'France' = 'France', 
+                                                    'United Kingdom' = 'United Kingdom', 
+                                                    'Greece' = 'Greece', 
+                                                    'China, Hong Kong SAR' = 'China, Hong Kong SAR', 
+                                                    'Italy' = 'Italy', 
+                                                    'Morocco' = 'Morocco', 
+                                                    'Luxembourg' = 'Luxembourg', 
+                                                    'Netherlands' = 'Netherlands', 
+                                                    'Norway' = 'Norway', 
+                                                    'Tunisia' = 'Tunisia', 
+                                                    'Turkey' = 'Turkey', 
+                                                    'United States of America' = 'United States of America', 
+                                                    "Sweden" = 'Sweden')),
+                         
+                         selectInput(input = 'Type', label = "Select type of refugee:", 
+                                     choices = list('Refugees (incl. refugee-like situations)' = 'Refugees (incl. refugee-like situations)',
+                                                    "Returnees" = 'Returnees',
+                                                    "Returned IDPs" = 'Returned IDPs',
+                                                    "Stateless" = 'Stateless',
+                                                    "Asylum-seekers" = 'Asylum-seekers',
+                                                    "Others of concern" = 'Others of concern',
+                                                    'Internally displaced persons'= 'Internally displaced persons'))
+           )
+  )
+)
          selectInput(input = 'year', label = "Select Year:", choices = c(1951:2016)),
                          
          # Input: Use dropdown to select unit of measurement
