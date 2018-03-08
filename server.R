@@ -48,6 +48,8 @@ server <- function(input, output) {
   
   time.series <- read.csv('data/time_series.csv', stringsAsFactors = FALSE, fileEncoding
                           = "UTF-8-BOM")
+  time.series[time.series=="*"]<-NA
+  time.series <- na.omit(time.series)
   #browser()
   
   # How to organize the dataframe
@@ -61,45 +63,51 @@ server <- function(input, output) {
     # If user clicks kilotons in the widget
     if (input$Direction == 'In') {
       # Filter the columns of interest
-      # browser()
       in.year <- filter(time.series, Year == input$year, Population.type == input$Type)
+      in.year <- in.year[1:20,]
+      
       if (nrow(in.year) == 0){
         none <- "No data available"
         return(none)
       }
       in.year[,5] <- sapply(in.year[,5], as.numeric)
+      in.year <- aggregate(x = in.year$Value, by = list(in.year$Year, in.year$Country...territory.of.asylum.residence), FUN = sum)
+      colnames(in.year)[2] <- "Country"
+      colnames(in.year)[3] <- "Value"
       in.data <- arrange(in.year, desc(Value))
       order.Value <- in.data$Value
       in.data$Rank <- NA
       in.data$Rank <- 1:nrow(in.data)
-      colnames(in.data)[2] <- "Country"
-      in.data[,5] <- sapply(in.data[,5], as.character)
-      in.data <- select(in.data, Rank, Country, Population.type, Value)
+      in.data[,3] <- sapply(in.data[,3], as.character)
+      in.data <- select(in.data, Rank, Country, Value)
       return(in.data)
       
       # User clicks "outgoing" in the widget
     } else {
       # Filter the columns of interest
       out.year <- filter(time.series, Year == input$year, Population.type == input$Type)
-      if (nrow(out.year) == 0){
+      out.year <- out.year[1:20, ]
+      if (nrow(out.year)) {
         none <- "No data available"
         return(none)
       }
       out.year[,5] <- sapply(out.year[,5], as.numeric)
+      out.year <- aggregate(x = out.year$Value, by = list(out.year$Year, out.year$Country...territory.of.asylum.residence), FUN = sum)
+      colnames(out.year)[2] <- "Country"
+      colnames(out.year)[3] <- "Value"
       out.data <- arrange(out.year, desc(Value))
       order.Value <- out.data$Value
       out.data$Rank <- NA
       out.data$Rank <- 1:nrow(out.data)
-      colnames(out.data)[2] <- "Country"
-      colnames(out.data)[5] <- "Leaving"
-      out.data[,5] <- sapply(out.data[,5], as.character)
-      out.data <- select(out.data, Rank, Origin, Population.type, Leaving)
+      colnames(out.data)[2] <- "Origin"
+      colnames(out.data)[3] <- "Leaving"
+      out.data[,3] <- sapply(out.data[,3], as.character)
+      out.data <- select(out.data, Rank, Origin, Leaving)
       return(out.data)
     }
   })
   
   output$graph <- renderPlot({
-    browser()
     graph.values <- filter(time.series, time.series$Country...territory.of.asylum.residence == input$Country,
                            time.series$Population.type == input$Type)
     if(nrow(graph.values) < 1) {

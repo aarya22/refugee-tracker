@@ -1,11 +1,11 @@
 library(ggplot2)
 library(dplyr)
 
-country <- "Canada"
+country <- "Belgium"
 pop.type <- "Refugees (incl. refugee-like situations)"
 time.series <- read.csv('data/time_series.csv', stringsAsFactors = FALSE, fileEncoding
                         = "UTF-8-BOM")
-time.series <- filter(time.series, time.series$Country...territory.of.asylum.residence == country,
+time.series1 <- filter(time.series, time.series$Country...territory.of.asylum.residence == country,
                       time.series$Population.type == pop.type)
 
 time.series.grouped <- aggregate(x = time.series$Value, by = list(time.series$Year), FUN = sum)%>%
