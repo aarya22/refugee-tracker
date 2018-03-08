@@ -86,31 +86,32 @@ server <- function(input, output) {
   })
 
   #output text explaining data for asylum seekers coming in 
-  output$in.text <- renderText({
+  output$in.text <- renderUI({
 
-    paste0("In the beginning of ", input$yearInput,  
-          ", there were about ", filtered.in()$people.in,
-           " asylum seekers that were from ", input$countryInput, 
-          " who were seeking asylum in a different country. Out of those seekers,",
-          "the United Nations provided assitance to about ", 
-          round(filtered.in()$un.help.percent, 2),
-          "% of the refugees.  Note: The column \" un.helped \" displays the total number",
-          " of refugees that the UN helped in that year for that country. 
-          If table is empty, there is no data found for that  year or country.")
-    
+    text <- paste0("In the beginning of ", input$yearInput,  
+                  ", there were about ", round(filtered.in()$people.in, 2),
+                   " asylum seekers that were from ", input$countryInput, 
+                  " who were seeking asylum in a different country. Out of those seekers,",
+                  "the United Nations provided assitance to about ", 
+                  round(filtered.in()$un.help.percent, 2),
+                  "% of the refugees.  Note: The column \" # of People that UN Helped \" displays the total number",
+                  " of refugees that the UN helped in that year for that country. 
+                  If table is empty, there is no data found for that  year or country.")
+    HTML(paste("<h4>",text,"</h4>", sep=""))
     
   })
   
   #output text explaining data for asylum seekers leaving country
-  output$out.text <- renderText({
+  output$out.text <- renderUI({
     
-    paste0("In the beginning of ", input$yearInput,  
-           ", there were about ", filtered.out()$people.out,
+    text <- paste0("In the beginning of ", input$yearInput,  
+           ", there were about ", round(filtered.out()$people.out, 2),
            " asylum seekers that came to ", input$countryInput, 
-           " who were seeking asylum. Out of those seekers,",
-           "the United Nations provided assitance to about ", filtered.out()$un.help.percent,
-           "% of the refugees.  Note: The column \" un.helped \" displays the total number",
+           " who were seeking asylum. Out of those seekers, ",
+           "the United Nations provided assitance to about ", round(filtered.out()$un.help.percent, 2),
+           "% of the refugees.  Note: The column \" # of People that UN Helped \" displays the total number",
            " of refugees that the UN helped in that year for that country.")
+    HTML(paste("<h4>",text,"</h4>", sep=""))
     
     
   })
@@ -465,4 +466,13 @@ server <- function(input, output) {
     title <- paste(input$countryInput, "in", input$yearInput)
     HTML(paste("<h1>",title,"</h1>", sep=""))
   })
+  
+  output$bartext <- renderUI({
+    text <- paste("The histogram displays data about the age demographics of the people
+                  coming into",input$countryInput,"in", input$yearInput,
+                  "The age groups represented in the data are from 0-17 years, 18+ years, 
+                   and years that are unknown because they were not reported for that population.")
+    HTML(paste("<h4>",text,"</h4>", sep=""))
+  })
+  
 }
