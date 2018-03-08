@@ -129,7 +129,7 @@ navbarPage("Refugee-Tracker", id="nav",
                                'Internally displaced persons'= 'Internally displaced persons'))
       )
     ),
-  tabPanel("Graph", tableOutput("graph"),
+  tabPanel("Graph", plotOutput("graph"),
            absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
                          draggable = TRUE, top = 60, left = "auto", right = 20, bottom = "auto",
                          width = 330, height = "auto",
@@ -138,7 +138,7 @@ navbarPage("Refugee-Tracker", id="nav",
                          
                          # Input: dropdown menu to select the year
                          selectInput(input = 'Country', label = "Select Country:", 
-                                     choices = list('Austrailia' = 'Austrailia', 
+                                     choices = list('Australia' = 'Australia', 
                                                     'Austria' = 'Austria', 
                                                     'Belgium' = 'Belgium', 
                                                     'Canada' = 'Canada', 

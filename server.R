@@ -5,7 +5,9 @@ library("geojsonio")
 library("dplyr")
 
 server <- function(input, output) {
-    
+  
+  graph.values <- read.csv('data/time_series.csv', stringsAsFactors = FALSE, fileEncoding
+                           = "UTF-8-BOM")
   world <- geojsonio::geojson_read("json/countries.geo.json", what = "sp")
   
   # Examples to demonstrate lines
@@ -96,19 +98,23 @@ server <- function(input, output) {
     }
   })
   
-  output$graph <- renderTable({
-    graph.values <- read.csv('data/time_series.csv', stringsAsFactors = FALSE, fileEncoding
-                            = "UTF-8-BOM")
-    graph.values <- filter(graph.values, graph.values$Country...territory.of.asylum.residence == input$Country,
-                          graph.values$Population.type == input$Type)
+  output$graph <- renderPlot({
+    browser()
+    graph.values <- filter(time.series, time.series$Country...territory.of.asylum.residence == input$Country,
+                           time.series$Population.type == input$Type)
+    if(nrow(graph.values) < 1) {
+      showNotification("No data available", type = "error")
+      return()
+    }
+    
+    graph.values[,5] <- sapply(graph.values[,5], as.numeric)
     
     graph.values.grouped <- aggregate(x = graph.values$Value, by = list(graph.values$Year), FUN = sum)%>%
       na.omit(graph.values.grouped)
     colnames(graph.values.grouped)[1] <- "Year"
     colnames(graph.values.grouped)[2] <- "Value"
     
-    graph.values[,1] <- sapply(graph.values[,1], as.numeric)
-    graph.values[,5] <- sapply(graph.values[,5], as.numeric)
+    #graph.values[,1] <- sapply(graph.values[,1], as.numeric)
     
     ggplot(data = graph.values.grouped) +
       geom_point(mapping = aes(x = Year, y = Value), color = "blue") +
